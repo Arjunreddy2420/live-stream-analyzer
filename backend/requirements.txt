@@ -1,0 +1,14 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+pydantic-settings==2.3.4
+sqlalchemy==2.0.31
+psycopg2-binary==2.9.9
+websockets==12.0
+ffmpeg-python==0.2.0
+scapy==2.5.0
+srt-python==0.0.5
+av==12.2.0
+prometheus-client==0.20.0
+pytest==8.2.2
+python-dotenv==1.0.1
