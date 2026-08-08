@@ -28,6 +28,26 @@ A monitoring tool for live video streams (SRT/RTMP) that inspects video/audio co
 
 3. The API is available at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs` and a health check at `http://localhost:8000/health`.
 
+## Testing with a Local Stream
+
+The stack includes a `mediamtx` service — a lightweight local RTMP/SRT server — so you can generate a synthetic test stream instead of depending on an external source. With the stack running, push a test pattern into it using `ffmpeg`:
+
+```bash
+# RTMP
+ffmpeg -re -f lavfi -i testsrc=size=1280x720:rate=30 \
+  -f lavfi -i sine=frequency=1000 \
+  -c:v libx264 -b:v 2500k -c:a aac \
+  -f flv rtmp://localhost:1935/live/test
+
+# SRT
+ffmpeg -re -f lavfi -i testsrc=size=1280x720:rate=30 \
+  -f lavfi -i sine=frequency=1000 \
+  -c:v libx264 -b:v 2500k -c:a aac \
+  -f mpegts "srt://localhost:8890?streamid=publish:test"
+```
+
+Then register a stream pointing at `rtmp://mediamtx:1935/live/test` (or the SRT equivalent) via the `/api/v1/streams` endpoint once it's implemented. Changing `-b:v`, `-r`, or the video codec mid-stream is a quick way to test quality/codec-drift detection. OBS Studio works as an alternative source if you'd rather push a real camera/screen capture.
+
 ## Project Structure
 
 ```

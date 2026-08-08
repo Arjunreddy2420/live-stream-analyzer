@@ -21,6 +21,15 @@ services:
     depends_on:
       - postgres
 
+  # Local RTMP/SRT test source. Push a stream into it with ffmpeg or OBS (see
+  # README "Testing with a local stream"), then point the analyzer's source_url
+  # at rtmp://localhost:1935/live/test or srt://localhost:8890?streamid=publish:test
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    ports:
+      - "1935:1935" # RTMP
+      - "8890:8890/udp" # SRT
+
   # frontend:
   #   build: ./frontend
   #   ports:
