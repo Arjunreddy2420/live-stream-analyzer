@@ -30,12 +30,16 @@ services:
       - "1935:1935" # RTMP
       - "8890:8890/udp" # SRT
 
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - backend
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_HOST: backend
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
