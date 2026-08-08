@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     min_fps: int = 24
     max_packet_loss: float = 1.0
 
+    # How often the background monitor re-analyzes each active stream, in seconds.
+    analysis_interval_seconds: int = 60
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

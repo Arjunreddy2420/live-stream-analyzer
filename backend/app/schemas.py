@@ -64,3 +64,29 @@ class StreamAnalysisResponse(BaseModel):
 
     packet_loss: float | None = None
     jitter_ms: float | None = None
+
+
+class AlertResponse(BaseModel):
+    """API representation of a stored alert."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    stream_id: int
+    timestamp: datetime
+    alert_type: str
+    severity: str
+    message: str
+
+
+class SCTEMarkerResponse(BaseModel):
+    """API representation of a detected SCTE marker."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    stream_id: int
+    timestamp: datetime
+    marker_type: str
+    event_id: str | None = None
+    marker_metadata: dict | None = None
