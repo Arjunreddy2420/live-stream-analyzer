@@ -12,7 +12,9 @@ A monitoring tool for live video streams (SRT/RTMP) that inspects video/audio co
 - Live updates over WebSocket
 - REST API for stream, analysis, and alert management
 
-## Quick Start
+## Quick Start (Docker)
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose plugin) — no local Python, Node, or ffmpeg install needed, all of that runs inside the containers.
 
 1. Copy the example environment file and adjust as needed:
 
@@ -20,13 +22,29 @@ A monitoring tool for live video streams (SRT/RTMP) that inspects video/audio co
    cp .env.example .env
    ```
 
-2. Start the stack with Docker Compose:
+2. Build and start the full stack (Postgres, backend, frontend, and a local `mediamtx` test source):
 
    ```bash
-   docker-compose up
+   docker compose up --build
    ```
 
-3. The API is available at `http://localhost:8000` (interactive docs at `/docs`, health check at `/health`), and the dashboard is available at `http://localhost:3000`.
+   (Use `docker-compose` with a hyphen instead of `docker compose` if you have the older standalone Compose v1 CLI.) First build takes a few minutes — the backend image installs `ffmpeg` and Python dependencies, and the frontend image installs npm packages. Subsequent runs are much faster (`docker compose up` without `--build`).
+
+3. Once it's up, check everything is healthy:
+
+   ```bash
+   docker compose ps
+   ```
+
+   You should see `postgres`, `backend`, `frontend`, and `mediamtx` all `Up` (Postgres shows `healthy`).
+
+4. The API is available at `http://localhost:8000` (interactive docs at `/docs`, health check at `/health`), and the dashboard is available at `http://localhost:3000`.
+
+5. To stop everything:
+
+   ```bash
+   docker compose down
+   ```
 
 ### Running without Docker
 
@@ -48,7 +66,9 @@ npm run dev
 
 ## Testing with a Local Stream
 
-The stack includes a `mediamtx` service — a lightweight local RTMP/SRT server — so you can generate a synthetic test stream instead of depending on an external source. With the stack running, push a test pattern into it using `ffmpeg`:
+The stack includes a `mediamtx` service — a lightweight local RTMP/SRT server — so you can generate a synthetic test stream instead of depending on an external source.
+
+**If you have `ffmpeg` installed locally**, push a test pattern into it directly:
 
 ```bash
 # RTMP
@@ -62,6 +82,21 @@ ffmpeg -re -f lavfi -i testsrc=size=1280x720:rate=30 \
   -f lavfi -i sine=frequency=1000 \
   -c:v libx264 -b:v 2500k -c:a aac \
   -f mpegts "srt://localhost:8890?streamid=publish:test"
+```
+
+**If you don't have `ffmpeg` installed locally**, the `backend` image already has it — run the push from a throwaway container on the same Docker network instead:
+
+```bash
+docker run -d --name mediamtx-test-push \
+  --network live-stream-analyzer_default \
+  live-stream-analyzer-backend \
+  ffmpeg -re -f lavfi -i testsrc=size=1280x720:rate=30 \
+  -f lavfi -i sine=frequency=1000 \
+  -c:v libx264 -b:v 2500k -c:a aac \
+  -f flv rtmp://mediamtx:1935/live/test
+
+# stop it later with:
+docker stop mediamtx-test-push && docker rm mediamtx-test-push
 ```
 
 Then register a stream pointing at `rtmp://mediamtx:1935/live/test` (or the SRT equivalent) from the dashboard, or via:

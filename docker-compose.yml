@@ -11,6 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d stream_analyzer"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: ./backend
@@ -19,7 +24,8 @@ services:
     environment:
       DATABASE_URL: postgresql://user:password@postgres:5432/stream_analyzer
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   # Local RTMP/SRT test source. Push a stream into it with ffmpeg or OBS (see
   # README "Testing with a local stream"), then point the analyzer's source_url
