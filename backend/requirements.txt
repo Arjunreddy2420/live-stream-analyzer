@@ -6,9 +6,6 @@ sqlalchemy==2.0.31
 psycopg2-binary==2.9.9
 websockets==12.0
 ffmpeg-python==0.2.0
-scapy==2.5.0
-srt-python==0.0.5
-av==12.2.0
 prometheus-client==0.20.0
 pytest==8.2.2
 httpx==0.27.0
